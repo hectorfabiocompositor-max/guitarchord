@@ -1,0 +1,5 @@
+{
+  "name": "Guitar Chord Extractor",
+  "description": "An application that analyzes audio files, transcribes lyrics, and adds guitar chords above the lyrics.",
+  "requestFramePermissions": []
+}
