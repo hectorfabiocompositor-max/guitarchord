@@ -111,7 +111,7 @@ export default function App() {
       const ai = getAI();
       const base64Data = await fileToBase64(file);
 
-      const prompt = `Analyze this audio file which contains a song and extract the lyrics and guitar chords.
+      const prompt = `Analyze this audio file which contains a song and extract the lyrics and guitar chords with MAXIMUM PRECISION.
 
 CRITICAL INSTRUCTION REGARDING FORMAT:
 DO NOT include any conversational filler, introductory text, greetings, or general musical analysis.
@@ -123,9 +123,9 @@ CRITICAL INSTRUCTION REGARDING LANGUAGE:
 Detect the language of the song. All section headers (like Verse/Verso, Chorus/Estribillo), Capo, and Strumming instructions MUST be in the same language as the song.
 
 Your task is to:
-1. Transcribe the lyrics of the song accurately.
-2. Identify the guitar chords that should be played with each line of lyrics.
-3. Format the output so that chords appear ABOVE the syllable/word where they should be played.
+1. Transcribe the lyrics of the song with 100% accuracy.
+2. Identify the EXACT guitar chords that should be played with each line of lyrics.
+3. EXTREME PRECISION: Format the output so that chords appear EXACTLY ABOVE the specific syllable or word where the chord change occurs. This is critical for musicians.
 4. Suggest a capo position if it makes the chords easier to play or matches the original recording. State the capo position at the very beginning of the output (e.g., "Capo: 2nd fret" or "Capotrasto: traste 2").
 5. Provide a brief, standardized description of the strumming pattern (rasgueo) or picking style used in the song right after the Capo position.
 
