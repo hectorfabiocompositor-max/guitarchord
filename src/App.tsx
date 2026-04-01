@@ -3,7 +3,13 @@ import { GoogleGenAI } from '@google/genai';
 import { Upload, FileAudio, Loader2, Copy, RefreshCw, Music, Download, Smartphone } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'MY_GEMINI_API_KEY' || apiKey === 'TU_LLAVE_AQUI') {
+    throw new Error('API Key de Gemini no encontrada. Por favor, configúrala en el archivo .env');
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -102,6 +108,7 @@ export default function App() {
     setError(null);
 
     try {
+      const ai = getAI();
       const base64Data = await fileToBase64(file);
 
       const prompt = `Analyze this audio file which contains a song and extract the lyrics and guitar chords.
@@ -225,6 +232,11 @@ Remember: NO INTRODUCTORY TEXT. JUST THE CAPO, STRUMMING PATTERN, AND THE CHORDS
     }
   };
 
+  const isApiKeyMissing = !process.env.GEMINI_API_KEY || 
+    process.env.GEMINI_API_KEY === 'undefined' || 
+    process.env.GEMINI_API_KEY === 'MY_GEMINI_API_KEY' || 
+    process.env.GEMINI_API_KEY === 'TU_LLAVE_AQUI';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 font-sans p-6">
       <div className="max-w-4xl mx-auto">
@@ -252,9 +264,9 @@ Remember: NO INTRODUCTORY TEXT. JUST THE CAPO, STRUMMING PATTERN, AND THE CHORDS
           )}
         </header>
 
-        {!process.env.GEMINI_API_KEY && (
+        {isApiKeyMissing && (
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-8 text-amber-400 text-center">
-            ⚠️ La API de Gemini no está configurada. Por favor, configura la variable de entorno GEMINI_API_KEY.
+            ⚠️ La API de Gemini no está configurada. Por favor, crea un archivo .env y configura la variable GEMINI_API_KEY.
           </div>
         )}
 
@@ -328,7 +340,7 @@ Remember: NO INTRODUCTORY TEXT. JUST THE CAPO, STRUMMING PATTERN, AND THE CHORDS
             <div className="flex justify-center">
               <button
                 onClick={extractChords}
-                disabled={!file || loading || !process.env.GEMINI_API_KEY}
+                disabled={!file || loading || isApiKeyMissing}
                 className="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full hover:from-rose-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-rose-500 disabled:hover:to-orange-500"
               >
                 {loading ? (
