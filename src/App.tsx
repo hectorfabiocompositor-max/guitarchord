@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
-import { Upload, FileAudio, Loader2, Copy, RefreshCw, Music, Download } from 'lucide-react';
+import { Upload, FileAudio, Loader2, Copy, RefreshCw, Music, Download, Smartphone } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -11,7 +11,39 @@ export default function App() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the default browser prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+      // Update UI notify the user they can install the PWA
+      setShowInstallBtn(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    // Optionally, send analytics event with outcome of user choice
+    console.log(`User response to the install prompt: ${outcome}`);
+    // We've used the prompt, and can't use it again, throw it away
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -206,6 +238,18 @@ Remember: NO INTRODUCTORY TEXT. JUST THE CAPO, STRUMMING PATTERN, AND THE CHORDS
           <p className="text-slate-400 text-lg">
             Extrae la letra y acordes de guitarra de cualquier canción usando IA
           </p>
+          
+          {showInstallBtn && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleInstallClick}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-full hover:bg-rose-500/20 transition-all duration-200"
+              >
+                <Smartphone className="w-4 h-4 mr-2" />
+                Instalar App en el dispositivo
+              </button>
+            </div>
+          )}
         </header>
 
         {!process.env.GEMINI_API_KEY && (
